@@ -1,34 +1,32 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { auth, database } from './server/src/firebase';
 
 
-export default class App extends Component {
-  state = {
-    text: ''
-  }
+export default function App({token_id = 'token_id'}) {
+  const [state, setState] = useState({ text: ''});
 
-  componentDidMount() {
-    this.fetchdata();
-  }
+  useEffect(() => {
+    async function fetchdata() {
+      const data = await database.ref(`user/${token_id}`).once('value').then(snapshot => {
+        return snapshot.val()
+      });
+    
+      setState({text: data})
+    }
+    fetchdata();
+  }, [token_id])
 
-  fetchdata = async () => {
-    const data = await database.ref('data').once('value').then(snapshot => {
-      return snapshot.val()
-    });
 
-    this.setState({text: data});
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text>Hello!</Text>
-        <Text>{this.state.text}</Text>
-      </View>
-    );
-  }
+  return (
+    <View style={styles.container}>
+      <Text>Hello!</Text>
+      <Text>{state.text}</Text>
+    </View>
+  );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
